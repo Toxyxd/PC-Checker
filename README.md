@@ -1,17 +1,51 @@
 # Toxy Anti-Cheat - Source Code
 
-This folder contains the complete, readable source code for the executable
-inside, plus the working exe itself. Everything here is open for inspection.
+This folder contains the complete, readable source code for the executable and
+the website, plus the working exe itself. Everything here is open for
+inspection.
+
+## Get started in one click
+
+Double-click **`start-server.bat`**:
+
+1. It checks for Node.js,
+2. runs `npm install` the first time,
+3. starts the dashboard at **http://localhost:3000** and opens it in your browser.
+
+Keep the black window open while you use it. Close it to stop the server.
+
+Done manually instead:
+
+```powershell
+npm install        # first time only
+npm start
+```
+
+## The website
+
+`index.js` is an Express server. When you start it (via the .bat or `npm start`):
+
+- **http://localhost:3000** - the dashboard where scan results appear
+- It also stores scans under `data/scans/` and scores cheat risk heuristically.
+- `PUBLIC_DOMAIN` (default shown in code) is used only for "Copy share link" /
+  public-page links, not for uploading scan data.
+
+To receive scans from the bundled exe, keep this server running on port 3000 and
+run `dist\PC_Check_Scan.exe` (consent it with CHECK PC) - its upload URL in this
+build is `http://127.0.0.1:3000`, matching the local server.
 
 ## What's in here
 
 | Path | What it is |
 |---|---|
-| `scan/scan-client.cjs` | The entire scan logic - this is the "brain" of the exe |
+| `start-server.bat` | Double-click launcher - starts the local dashboard at http://localhost:3000 |
+| `index.js` | The website + API server (dashboard, scan storage, heuristic risk scoring) |
+| `scan/scan-client.cjs` | The scan logic - this is the "brain" of the exe |
 | `scripts/ToxyGui.cs` | The consent / scanning / done windows (C# source) |
 | `scripts/build-scan-exe.ps1` | The script that compiles all of the above into the exe |
 | `dist/PC_Check_Scan.exe` | The working scanner, built directly from the source above |
 | `dist/PCCheckerSetup.exe` | Optional installer (uses the same source) |
+| `assets/logo.png` | Logo used by the website and the exe |
 
 ## What the exe actually is
 
@@ -42,9 +76,9 @@ npm run build:scan-exe
 ## Destination of results
 
 In this build the upload URL is `http://127.0.0.1:3000` - the local default in
-the source. Install, and run a server on that port, to receive scans. Results
-are not sent anywhere unless you explicitly set the target, or the owner of the
-project rebuilds the exe with their own URL via `build-scan-exe.ps1`.
+the source. Results are only sent to a server that you run locally. They are not
+sent anywhere unless you explicitly set the target, or the owner of the project
+rebuilds the exe with their own URL via `build-scan-exe.ps1`.
 
 ## Privacy
 

@@ -1,0 +1,22 @@
+{
+  "name": "pc-integrity-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "scan": "node index.js scan",
+    "install:local": "powershell -ExecutionPolicy Bypass -File scripts/install-checker.ps1",
+    "package:zip": "powershell -ExecutionPolicy Bypass -File scripts/create-package.ps1",
+    "build:installer": "powershell -ExecutionPolicy Bypass -File scripts/build-installer.ps1",
+    "build:scan-exe": "powershell -ExecutionPolicy Bypass -File scripts/build-scan-exe.ps1",
+    "make:loader": "powershell -ExecutionPolicy Bypass -File scripts/make-loader.ps1"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "postject": "^1.0.0-alpha.6"
+  }
+}
