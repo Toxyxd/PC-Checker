@@ -33,28 +33,28 @@ opensource scan results only appear on localhost:8000 and never on toxy.lol.
 - `npm start` / `start-server.bat` run this dashboard.
 - `npm run server` runs the full site (`index.js`), which stays on **http://localhost:3000**.
 
-## The full website
+## The website
 
-`index.js` is the full Express server (dashboard + PC-Check builder + public
-result pages). It is untouched by the opensource dashboard and runs on
+`index.js` is the full Express server (dashboard + PC-Check dashboard + results
+pages). It is untouched by the opensource dashboard and runs on
 **http://localhost:3000**. It stores scans under `data/scans/` and scores cheat
-risk heuristically. `PUBLIC_DOMAIN` (default shown in code) is used only for
-"Copy share link" / public-page links, not for uploading scan data.
+risk heuristically. `PUBLIC_DOMAIN` (default `https://toxy.lol`) is used for the
+public share links and is the address baked into the `:3000`-served exe.
 
-To receive scans from the bundled exe, keep this dashboard running on port 8000.
-The exe uploads to the address baked in at build time; the prebuilt
-`dist\PC_Check_Scan.exe` points at `http://192.168.56.1:8000` (your host's
-VirtualBox host-only IP), so scans run inside a VM still reach the host dashboard.
-The dashboard binds `0.0.0.0`, so it is reachable from your LAN and VMs too.
+The exe served at `https://toxy.lol/api/pc-check/download` uploads to the
+website: the prebuilt `dist\PC_Check_Scan.exe` points at `https://toxy.lol`, so
+downloads from toxy.lol return their scan logs to the website dashboard.
 
-If you scan on the host machine itself (no VM), run the exe with:
+`dist\PC_Check_scan.exe` currently used only by the full website. To send its
+upload anywhere else (e.g. the opensource dashboard on `localhost:8000`), point
+the exe at that server without rebuilding:
 
 ```powershell
 set API_URL=http://localhost:8000
 dist\PC_Check_Scan.exe
 ```
 
-To send scans to a different address, rebuild with:
+Or lock in another URL permanently:
 
 ```powershell
 npm run build:scan-exe -- -ApiUrl http://<address>:8000

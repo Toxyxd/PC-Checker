@@ -11,6 +11,7 @@ if ($ApiUrl -match "your-server|something-random|YOUR_") {
 }
 
 $root = Split-Path -Parent $PSScriptRoot
+Set-Location -LiteralPath $root
 $seaDir = Join-Path $root "sea"
 $distDir = Join-Path $root "dist"
 $configPath = Join-Path $seaDir "sea-config.json"
@@ -35,6 +36,7 @@ if (Test-Path -LiteralPath $outPath) {
 # Bake the upload URL into a bundle copy of the source (SEA packs a single file).
 $sourcePath = Join-Path $root "scan\scan-client.cjs"
 $bundlePath = Join-Path $seaDir "scan-client.bundle.cjs"
+if (-not (Test-Path $seaDir)) { New-Item -ItemType Directory -Path $seaDir | Out-Null }
 $source = Get-Content -LiteralPath $sourcePath -Raw
 $source = $source.Replace("__SCAN_API_URL__", $ApiUrl)
 
