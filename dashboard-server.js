@@ -1,75 +1,25 @@
-// Toxy Anti-Cheat - Opensource Dashboard (read-only log viewer)
+// Toxy Anti-Cheat - Opensource Dashboard
 //
-// This server ONLY shows the dashboard. It is intentionally separate from
-// index.js (the full site) so the live server on :3000 and toxy.lol keep
-// working exactly as before. It reads the same scan files from data/scans.
+// This server hosts the scan dashboard and ALSO receives uploads from the
+// scan client (POST /api/scans), storing them in the same data/scans folder
+// that index.js uses. It is intentionally separate from index.js (the full
+// site) so the live server on :3000 and toxy.lol keep working exactly as
+// before. It binds to 0.0.0.0 so scans sent from a VM (reachable via the
+// host IP) are stored and shown here.
 //
-// Run: node dashboard.js   ->   http://localhost:8000
+// Run: node dashboard-server.js   ->   http://localhost:8000
 
 import express from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from "uuid";
+import {
+  listScans,
+  getScan,
+  insertScan,
+  validateScanPayload,
+} from "./scan/scan-store.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 8000);
-const SCANS_DIR = path.join(__dirname, "data", "scans");
-
-function scanFilePath(scanId) {
-  return path.join(SCANS_DIR, `${scanId}.json`);
-}
-
-function readAllScans() {
-  if (!fs.existsSync(SCANS_DIR)) return [];
-  return fs
-    .readdirSync(SCANS_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .map((f) => {
-      try {
-        return JSON.parse(fs.readFileSync(path.join(SCANS_DIR, f), "utf8"));
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => new Date(b.scanned_at) - new Date(a.scanned_at));
-}
-
-function listScans() {
-  const scans = readAllScans();
-  return scans.map((s) => {
-    const risk = s.risk || { score: 0, level: "low", flags: [] };
-    return {
-      id: s.id,
-      device_id: s.device_id,
-      device_name: s.device_name,
-      consent_given: Boolean(s.consent_given),
-      scanned_at: s.scanned_at,
-      created_at: s.created_at,
-      program_count: (s.installedPrograms ?? []).length,
-      process_count: (s.runningProcesses ?? []).length,
-      download_count: (s.downloadFiles ?? []).length,
-      temp_count: (s.tempFiles ?? []).length,
-      desktop_count: (s.desktopFiles ?? []).length,
-      system_count: (s.systemFiles ?? []).length,
-      dll_count: (s.dllFiles ?? []).length,
-      disk_count: (s.diskSweep ?? []).length,
-      forensics_count: (s.forensics?.prefetch ?? []).length + (s.forensics?.evtx ?? []).length,
-      risk_score: risk.score,
-      risk_level: risk.level,
-    };
-  });
-}
-
-function getScan(scanId) {
-  const filePath = scanFilePath(scanId);
-  if (!fs.existsSync(filePath)) return null;
-  try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch {
-    return null;
-  }
-}
+const HOST = process.env.HOST || "0.0.0.0";
 
 function dashboardHtml() {
   return `<!doctype html>
@@ -277,6 +227,7 @@ function dashboardHtml() {
 }
 
 const app = express();
+app.use(express.json({ limit: "80mb" }));
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.get("/api/scans", (_req, res) => res.json(listScans()));
 app.get("/api/scans/:id", (req, res) => {
@@ -284,8 +235,30 @@ app.get("/api/scans/:id", (req, res) => {
   if (!scan) return res.status(404).json({ error: "Scan not found." });
   res.json(scan);
 });
+app.post("/api/scans", (req, res) => {
+  const error = validateScanPayload(req.body);
+  if (error) return res.status(400).json({ error });
+  const scan = {
+    id: req.body.id || uuidv4(),
+    deviceId: req.body.deviceId,
+    deviceName: req.body.deviceName,
+    consentGiven: true,
+    scannedAt: req.body.scannedAt || new Date().toISOString(),
+    installedPrograms: req.body.installedPrograms,
+    runningProcesses: req.body.runningProcesses,
+    downloadFiles: req.body.downloadFiles,
+    tempFiles: req.body.tempFiles,
+    desktopFiles: req.body.desktopFiles,
+    systemFiles: req.body.systemFiles,
+    dllFiles: req.body.dllFiles,
+    diskSweep: req.body.diskSweep,
+    forensics: req.body.forensics,
+  };
+  insertScan(scan);
+  res.status(201).json({ id: scan.id, message: "Scan stored." });
+});
 app.get("/", (_req, res) => res.type("html").send(dashboardHtml()));
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`Dashboard running at http://localhost:${PORT}`);
 });

@@ -4,6 +4,12 @@ data/
 # node
 node_modules/
 
+# Single-executable build artifacts
+sea/
+dist/ToxyGui.exe
+dist/ToxyGui.generated.cs
+assets/logo.ico
+
 # os
 Thumbs.db
 Desktop.ini

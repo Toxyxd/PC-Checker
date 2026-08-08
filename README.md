@@ -23,9 +23,11 @@ npm start          # opensource dashboard on http://localhost:8000
 
 ## The opensource dashboard
 
-`dashboard-server.js` is a small read-only dashboard on **http://localhost:8000**.
+`dashboard-server.js` is a small dashboard on **http://localhost:8000**.
 It has no logo, loading screen, or PC-Check builder - just the scan log table and
-the per-scan detail view. It reads the scan files under `data/scans/`.
+the per-scan detail view. Besides showing the scans, it also *receives* uploads
+(`POST /api/scans`) and stores them under `data/scans/`, so it works on its own
+without the full site.
 
 - `npm start` / `start-server.bat` run this dashboard.
 - `npm run server` runs the full site (`index.js`), which stays on **http://localhost:3000**.
@@ -38,9 +40,24 @@ result pages). It is untouched by the opensource dashboard and runs on
 risk heuristically. `PUBLIC_DOMAIN` (default shown in code) is used only for
 "Copy share link" / public-page links, not for uploading scan data.
 
-To receive scans from the bundled exe, keep the full server running on port 3000
-and run `dist\PC_Check_Scan.exe` (consent it with CHECK PC) - its upload URL in
-this build is `http://127.0.0.1:3000`, matching the local server.
+To receive scans from the bundled exe, keep this dashboard running on port 8000.
+The exe uploads to the address baked in at build time; the prebuilt
+`dist\PC_Check_Scan.exe` points at `http://192.168.56.1:8000` (your host's
+VirtualBox host-only IP), so scans run inside a VM still reach the host dashboard.
+The dashboard binds `0.0.0.0`, so it is reachable from your LAN and VMs too.
+
+If you scan on the host machine itself (no VM), run the exe with:
+
+```powershell
+set API_URL=http://localhost:8000
+dist\PC_Check_Scan.exe
+```
+
+To send scans to a different address, rebuild with:
+
+```powershell
+npm run build:scan-exe -- -ApiUrl http://<address>:8000
+```
 
 ## What's in here
 
@@ -84,10 +101,12 @@ npm run build:scan-exe
 
 ## Destination of results
 
-In this build the upload URL is `http://127.0.0.1:3000` - the local default in
-the source. Results are only sent to a server that you run locally. They are not
-sent anywhere unless you explicitly set the target, or the owner of the project
-rebuilds the exe with their own URL via `build-scan-exe.ps1`.
+The dashboard on port 8000 both displays and stores scans. In the current build
+the upload URL is `http://192.168.56.1:8000` (your host's VirtualBox host-only
+IP, reachable from local VMs). Results go only to a server you run locally, on
+your own network. They are not sent anywhere unless you explicitly set the
+target, or the owner of the project rebuilds the exe with their own URL via
+`build-scan-exe.ps1`.
 
 ## Privacy
 
