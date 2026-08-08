@@ -28,10 +28,32 @@ It has no logo, loading screen, or PC-Check builder - just the scan log table an
 the per-scan detail view. Besides showing the scans, it also *receives* uploads
 (`POST /api/scans`) and stores them. It keeps its own storage folder
 (`data/dashboard-scans/`), which is **separate from the full site**, so
-opensource scan results only appear on localhost:8000 and never on toxy.lol.
+opensource scan results only appear on the localhost:8000 dashboard.
 
 - `npm start` / `start-server.bat` run this dashboard.
 - `npm run server` runs the full site (`index.js`), which stays on **http://localhost:3000**.
+
+## Hosting the opensource exe yourself
+
+The bundled `dist\PC_Check_Scan.exe` is baked with
+**`http://localhost:8000`** - so whoever hosts this repo (runs the dashboard on
+port 8000) and then runs the exe gets the scan logs right in their own
+localhost:8000 dashboard. Same machine, same folder: the log appears
+automatically.
+
+To point the exe at a different server (e.g. your own on another port), override
+at runtime without rebuilding:
+
+```powershell
+set API_URL=http://<host>:<port>
+dist\PC_Check_Scan.exe
+```
+
+Or bake it in permanently while building:
+
+```powershell
+npm run build:scan-exe -- -ApiUrl http://<address>:8000
+```
 
 ## The website
 
@@ -39,25 +61,14 @@ opensource scan results only appear on localhost:8000 and never on toxy.lol.
 pages). It is untouched by the opensource dashboard and runs on
 **http://localhost:3000**. It stores scans under `data/scans/` and scores cheat
 risk heuristically. `PUBLIC_DOMAIN` (default `https://toxy.lol`) is used for the
-public share links and is the address baked into the `:3000`-served exe.
+public share links and for the exe it serves to visitors.
 
-The exe served at `https://toxy.lol/api/pc-check/download` uploads to the
-website: the prebuilt `dist\PC_Check_Scan.exe` points at `https://toxy.lol`, so
-downloads from toxy.lol return their scan logs to the website dashboard.
-
-`dist\PC_Check_scan.exe` currently used only by the full website. To send its
-upload anywhere else (e.g. the opensource dashboard on `localhost:8000`), point
-the exe at that server without rebuilding:
+Note: when the full website builds its exe (`/api/pc-check/build`), it bakes
+`PUBLIC_DOMAIN` in and overwrites `dist\PC_Check_Scan.exe`. To switch back to
+the opensource default, run:
 
 ```powershell
-set API_URL=http://localhost:8000
-dist\PC_Check_Scan.exe
-```
-
-Or lock in another URL permanently:
-
-```powershell
-npm run build:scan-exe -- -ApiUrl http://<address>:8000
+npm run build:scan-exe -- -ApiUrl http://localhost:8000
 ```
 
 ## What's in here
