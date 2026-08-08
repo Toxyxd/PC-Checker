@@ -1,5 +1,9 @@
 // Shared scan storage + scoring for the opensource dashboard.
 // Mirrors the logic in index.js so both servers write identical scan files.
+//
+// IMPORTANT: the dashboard stores scans in its OWN folder
+// (data/dashboard-scans), NOT data/scans which index.js / toxy.lol read.
+// This keeps the opensource results on localhost:8000 only.
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,7 +12,7 @@ import { v4 as uuidv4 } from "uuid";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const SCANS_DIR =
   process.env.SCANS_DIR ||
-  path.join(__dirname, "..", "data", "scans");
+  path.join(__dirname, "..", "data", "dashboard-scans");
 
 if (!fs.existsSync(SCANS_DIR)) {
   fs.mkdirSync(SCANS_DIR, { recursive: true });

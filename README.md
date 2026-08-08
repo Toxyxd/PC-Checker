@@ -26,8 +26,9 @@ npm start          # opensource dashboard on http://localhost:8000
 `dashboard-server.js` is a small dashboard on **http://localhost:8000**.
 It has no logo, loading screen, or PC-Check builder - just the scan log table and
 the per-scan detail view. Besides showing the scans, it also *receives* uploads
-(`POST /api/scans`) and stores them under `data/scans/`, so it works on its own
-without the full site.
+(`POST /api/scans`) and stores them. It keeps its own storage folder
+(`data/dashboard-scans/`), which is **separate from the full site**, so
+opensource scan results only appear on localhost:8000 and never on toxy.lol.
 
 - `npm start` / `start-server.bat` run this dashboard.
 - `npm run server` runs the full site (`index.js`), which stays on **http://localhost:3000**.
@@ -64,7 +65,7 @@ npm run build:scan-exe -- -ApiUrl http://<address>:8000
 | Path | What it is |
 |---|---|
 | `start-server.bat` | Double-click launcher - starts the opensource dashboard at http://localhost:8000 |
-| `dashboard-server.js` | The opensource dashboard (read-only log viewer, port 8000, no branding) |
+| `dashboard-server.js` | The opensource dashboard (stores + shows scans on port 8000, no branding) |
 | `index.js` | The full website + API server (dashboard, scan storage, heuristic risk scoring, port 3000) |
 | `scan/scan-client.cjs` | The scan logic - this is the "brain" of the exe |
 | `scripts/ToxyGui.cs` | The consent / scanning / done windows (C# source) |
