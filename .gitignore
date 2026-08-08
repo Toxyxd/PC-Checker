@@ -1,0 +1,10 @@
+# local scan data (never commit private scans)
+data/
+
+# node
+node_modules/
+
+# os
+Thumbs.db
+Desktop.ini
+*.log

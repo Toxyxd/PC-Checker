@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableExtensions
-title Toxy Anti-Cheat Local Server
+title Toxy Anti-Cheat - Opensource Dashboard
 cd /d "%~dp0"
 
 echo ============================================
-echo    Toxy Anti-Cheat - Local Dashboard
+echo    Toxy Anti-Cheat - Opensource Dashboard
 echo ============================================
 echo.
 
@@ -27,10 +27,10 @@ if not exist "node_modules" (
 )
 
 echo.
-echo Starting server at http://localhost:3000
+echo Starting dashboard at http://localhost:8000
 echo Keep this window open. Close it to stop the server.
 echo.
-start "" "http://localhost:3000"
-node index.js
+start "" "http://localhost:8000"
+node dashboard-server.js
 
 pause

@@ -10,7 +10,7 @@ Double-click **`start-server.bat`**:
 
 1. It checks for Node.js,
 2. runs `npm install` the first time,
-3. starts the dashboard at **http://localhost:3000** and opens it in your browser.
+3. starts the opensource dashboard at **http://localhost:8000** and opens it in your browser.
 
 Keep the black window open while you use it. Close it to stop the server.
 
@@ -18,28 +18,37 @@ Done manually instead:
 
 ```powershell
 npm install        # first time only
-npm start
+npm start          # opensource dashboard on http://localhost:8000
 ```
 
-## The website
+## The opensource dashboard
 
-`index.js` is an Express server. When you start it (via the .bat or `npm start`):
+`dashboard-server.js` is a small read-only dashboard on **http://localhost:8000**.
+It has no logo, loading screen, or PC-Check builder - just the scan log table and
+the per-scan detail view. It reads the scan files under `data/scans/`.
 
-- **http://localhost:3000** - the dashboard where scan results appear
-- It also stores scans under `data/scans/` and scores cheat risk heuristically.
-- `PUBLIC_DOMAIN` (default shown in code) is used only for "Copy share link" /
-  public-page links, not for uploading scan data.
+- `npm start` / `start-server.bat` run this dashboard.
+- `npm run server` runs the full site (`index.js`), which stays on **http://localhost:3000**.
 
-To receive scans from the bundled exe, keep this server running on port 3000 and
-run `dist\PC_Check_Scan.exe` (consent it with CHECK PC) - its upload URL in this
-build is `http://127.0.0.1:3000`, matching the local server.
+## The full website
+
+`index.js` is the full Express server (dashboard + PC-Check builder + public
+result pages). It is untouched by the opensource dashboard and runs on
+**http://localhost:3000**. It stores scans under `data/scans/` and scores cheat
+risk heuristically. `PUBLIC_DOMAIN` (default shown in code) is used only for
+"Copy share link" / public-page links, not for uploading scan data.
+
+To receive scans from the bundled exe, keep the full server running on port 3000
+and run `dist\PC_Check_Scan.exe` (consent it with CHECK PC) - its upload URL in
+this build is `http://127.0.0.1:3000`, matching the local server.
 
 ## What's in here
 
 | Path | What it is |
 |---|---|
-| `start-server.bat` | Double-click launcher - starts the local dashboard at http://localhost:3000 |
-| `index.js` | The website + API server (dashboard, scan storage, heuristic risk scoring) |
+| `start-server.bat` | Double-click launcher - starts the opensource dashboard at http://localhost:8000 |
+| `dashboard-server.js` | The opensource dashboard (read-only log viewer, port 8000, no branding) |
+| `index.js` | The full website + API server (dashboard, scan storage, heuristic risk scoring, port 3000) |
 | `scan/scan-client.cjs` | The scan logic - this is the "brain" of the exe |
 | `scripts/ToxyGui.cs` | The consent / scanning / done windows (C# source) |
 | `scripts/build-scan-exe.ps1` | The script that compiles all of the above into the exe |
